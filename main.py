@@ -1,3 +1,5 @@
 from scraper import *
 
-login()
+session = login()
+validate_url()
+scraper()
