@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ig-scraper"
+description = "a simple instagram post scraper"
+version = "0.0.1"
+dependencies = [
+    "requests_html",
+    "lxml_html_clean",
+    "bs4",
+    "instaloader",
+]
+dynamic = ["version"]
+readme = "README.md"
+license = {file = "LICENSE"}
