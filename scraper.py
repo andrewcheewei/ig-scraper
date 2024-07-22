@@ -4,6 +4,9 @@ from datetime import datetime
 import requests 
 import requests_html
 from bs4 import BeautifulSoup
+from instaloader import *
+from urllib.parse import urlparse
+import json
 
 def validate_url() -> str:
     while True:
@@ -17,15 +20,12 @@ def validate_url() -> str:
             print("Invalid Instagram post url")
             continue 
         else:
-            print('Success!')
-            print(post_url + ' is valid')
             break 
     return post_url
-    
 
 def login():
     user = input('Enter username: ')
-    pwd = getpass.getpass('Enter password: ')
+    pwd = input('Enter password: ')
     credential = {'username': user, 'password': pwd}
     
     session = requests.Session()
@@ -41,6 +41,7 @@ def login():
     enc_password = '#PWD_INSTAGRAM_BROWSER:0:{}:{}'.format(int(datetime.now().timestamp()), pwd)
     login_response = session.post('https://www.instagram.com/api/v1/web/accounts/login/ajax/', data={'enc_password': enc_password, 'username': user}, allow_redirects=True)
     response_json = login_response.json()
+    print(response_json)
 
     if response_json['authenticated']:
         print("Success!")
@@ -54,3 +55,32 @@ def login():
         exit()   
         
     return session
+
+def scrape(session):
+    loader = instaloader.Instaloader()
+
+    # obtain post from url
+    path = urlparse(validate_url()).path
+    shortcode = path.lstrip('/p/').rstrip('/')
+    post = Post.from_shortcode(loader.context, shortcode)
+
+    comments = []
+    for comment in post.get_comments():
+        comments.append({
+            'username': comment.owner.username,
+            'text': comment.text
+        })
+    
+    likes = []
+    for like in post.get_likes():
+        likes.append(like.username)
+
+    data = {
+        'shortcode': shortcode,
+        'num_likes': post.likes,
+        'likes': likes,
+        'comments': comments
+    }
+
+    with open('post_data.json', 'w') as file:
+        json.dump(data, file, indent=4)
