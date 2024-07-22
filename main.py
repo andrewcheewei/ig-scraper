@@ -2,4 +2,5 @@ from scraper import *
 
 session = login()
 validate_url()
-scraper()
+# add session as param
+scrape(session)
